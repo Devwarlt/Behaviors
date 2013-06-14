@@ -17,7 +17,6 @@ namespace wServer.logic
             
             .Init(0x0d28, Behaves("Tomb Defender",
            new RunBehaviors(
-                new SetKey(-1, 1),
                 IfEqual.Instance(-1, 1,
                   new QueuedBehavior(
                     Circling.Instance(5, 10, 5, 0x0d25),
@@ -28,7 +27,7 @@ namespace wServer.logic
                 IfEqual.Instance(-1, 2,
                   new QueuedBehavior(
                     Timed.Instance(5000, Cooldown.Instance(700, (RingAttack.Instance(25, 10, projectileIndex: 3)))),                   
-                    Once.Instance(new SimpleTaunt(Impudence! I am an immortal, I needn't take you seriously.)),
+                    Once.Instance(new SimpleTaunt("Impudence! I am an immortal, I needn't take you seriously.")),
                     HpLesserPercent.Instance(0.98f, new SetKey(-1, 3))
                     )
                 ),
@@ -37,7 +36,7 @@ namespace wServer.logic
                        Once.Instance(SetConditionEffect.Instance(ConditionEffectIndex.Armored)),
                        Cooldown.Instance(5000, RingAttack.Instance(4, 10, projectileIndex: 1)),
                        Cooldown.Instance(5000, RingAttack.Instance(5, 10, projectileIndex: 0)),
-                       Cooldown.Instance(2000, MultiAttack.Instance(25, 45 * (float)Math.PI / 180, 10, 0, projectileIndex: 2))
+                       Cooldown.Instance(2000, MultiAttack.Instance(25, 45 * (float)Math.PI / 180, 10, 0, projectileIndex: 2)),
                        HpLesserPercent.Instance(0.90f, new SetKey(-1, 4))
                     )
                 ),
@@ -45,7 +44,7 @@ namespace wServer.logic
                   new QueuedBehavior(
                         Cooldown.Instance(5000, MultiAttack.Instance(25, 10 * (float)Math.PI / 180, 5, 0, projectileIndex: 1)),
                         Cooldown.Instance(5000, MultiAttack.Instance(25, 10 * (float)Math.PI / 180, 3, 0, projectileIndex: 0)),
-                        Cooldown.Instance(2000, MultiAttack.Instance(25, 45 * (float)Math.PI / 180, 8, 0, projectileIndex: 2))
+                        Cooldown.Instance(2000, MultiAttack.Instance(25, 45 * (float)Math.PI / 180, 8, 0, projectileIndex: 2)),
                         HpLesserPercent.Instance(0.25f, new SetKey(-1, 5))
                     )
                 ),
@@ -74,21 +73,6 @@ namespace wServer.logic
                             Tuple.Create(0.05, (ILoot)new ItemLoot("Tome of Holy Protection")),
                             Tuple.Create(0.25, (ILoot)new ItemLoot("Ring of the Pyramid"))
                             )
-           );
-           
-            .Init(0x0d26, Behaves("Tomb Support",
-            new RunBehaviors(
-                new SetKey(-1, 1),
-                IfEqual.Instance(-1, 1,
-                  new QueuedBehavior(
-                    Circling.Instance(5, 10, 7, 0x0d25),
-                    Once.Instance(new SimpleTaunt("YOU HAVE AWAKENED US!")),
-                    HpLesserPercent.Instance(0.99f, new SetKey(-1, 2))
-                    )
-                ),
-             );
-
-            .Init(0x0d27, Behaves("Tomb Attacker",
            );
         
     }
