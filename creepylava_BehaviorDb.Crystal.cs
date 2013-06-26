@@ -1,19 +1,20 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using wServer.realm;
-using common;
-using wServer.logic.behaviors;
+using wServer.logic.attack;
+using wServer.logic.movement;
 using wServer.logic.loot;
-using wServer.logic.transitions;
+using wServer.logic.taunt;
+using wServer.logic.cond;
 
 namespace wServer.logic
 {
     partial class BehaviorDb
     {
-        _ Crystal = () => Behav()
-            .Init("Mysterious Crystal",
+        static _ Crystal = Behav()
+        /*.Init(0x0935, Behaves("Mysterious Crystal",
                     new State(
                         new State("Idle",
                             new Taunt(0.1, "Break the crystal for great rewards..."),
@@ -23,7 +24,7 @@ namespace wServer.logic
                         ),
                         new State("Instructions",
                             new Flash(0xffffffff, 2, 100),
-							new Taunt(0.8, "Fire upon this crystal with all your might for 5 seconds"),
+    						new Taunt(0.8, "Fire upon this crystal with all your might for 5 seconds"),
                             new Taunt(0.8, "If your attacks are weak, the crystal magically heals"),
                             new Taunt(0.8, "Gather a large group to smash it open"),
                             new HpLessTransition(0.998, "Evaluation")
@@ -58,7 +59,7 @@ namespace wServer.logic
 							
                         ),
                         new State("Fail",
-                            new Taunt("Perhaps you need a bigger group. Ask others to join you!"),
+                            new SimpleTaunt("Perhaps you need a bigger group. Ask others to join you!"),
                             new Flash(0xff000000, 5, 1),
                             new Shoot(10, count: 16, shootAngle: 22.5, fixedAngle: 0, coolDown: 100000),
                             new Heal(1, "Crystals", coolDown: 1000),
@@ -81,7 +82,7 @@ namespace wServer.logic
                 )
             .Init("Crystal Prisoner",
                     new State(
-                        new Spawn("Crystal Prisoner Steed", maxChildren: 3, initialSpawn: 0, coolDown: 200),
+                        new SpawnMinionImmidiate("Crystal Prisoner Steed", maxChildren: 3, initialSpawn: 0, coolDown: 200),
                         new State("pause",
                             new ConditionalEffect(ConditionEffectIndex.Invulnerable),
                             new TimedTransition(2000, "start_the_fun")
@@ -288,7 +289,69 @@ namespace wServer.logic
                             )
                         )
                     )
-                )
-                ;
+                );
+        */
+            .Init(0x0935, Behaves("Mysterious Crystal",
+                    attack: new RunBehaviors(
+                        new State("idle",
+                            new RandomTaunt(0.1, "Break the crystal for great rewards..."),
+                            new RandomTaunt(0.1, "Help me..."),
+                            HpLesserPercent.Instance(0.9f, SetState.Instance("Instructions")),
+                            CooldownExact.Instance(10000, SetState.Instance("idle"))
+                        ),
+                        new State("Instructions",
+                            Flashing.Instance(100, 0xffffffff),
+                            new RandomTaunt(0.8, "Fire upon this crystal with all your might for 5 seconds"),
+                            new RandomTaunt(0.8, "If your attacks are weak, the crystal magically heals"),
+                            new RandomTaunt(0.8, "Gather a large group to smash it open"),
+                            HpLesserPercent.Instance((float)0.998, SetState.Instance("Evaluation.Comment1"))
+                        ),
+                        new State("Evaluation",
+                            new SubState("Comment1",
+                                new SimpleTaunt("Sweet treasure awaits for powerful adventurers!"),
+                                new RandomTaunt(0.4, "Yes!  Smash my prison for great rewards!"),
+                                CooldownExact.Instance(5000, SetState.Instance(".Comment2"))
+                            ),
+                            new SubState("Comment2",
+                                new RandomTaunt(0.3, "If you are not very strong, this could kill you"),
+                                new RandomTaunt(0.3, "If you are not yet powerful, stay away from the Crystal"),
+                                new RandomTaunt(0.3, "New adventurers should stay away"),
+                                new RandomTaunt(0.3, "That's the spirit. Lay your fire upon me."),
+                                new RandomTaunt(0.3, "So close..."),
+                                CooldownExact.Instance(5000, SetState.Instance(".Comment3"))
+                            ),
+                            new SubState("Comment3",
+                                new RandomTaunt(0.4, "I think you need more people..."),
+                                new RandomTaunt(0.4, "Call all your friends to help you break the crystal!"),
+                                CooldownExact.Instance(10000, SetState.Instance(".Comment2"))
+                            ),
+                            Cooldown.Instance(5000, Heal.Instance(1, 999999, 0x0935)),
+                            HpLesserPercent.Instance((float)0.95, SetState.Instance("StartBreak")),
+                            CooldownExact.Instance(60000, SetState.Instance("Fail"))
+                        ),
+                        new State("Fail",
+                            new SimpleTaunt("Perhaps you need a bigger group. Ask others to join you!"),
+                            Flashing.Instance(1000, 0xff000000),
+                            MultiAttack.Instance(10, numShot: 16, angle: (float)22.5)),
+                            Cooldown.Instance(1000, Heal.Instance(1, 999999, 0x0935)),
+                            CooldownExact.Instance(5000, SetState.Instance("idle"))
+                        )
+                        )
+                        );
+                        /*new State("StartBreak",
+                            new Taunt("You cracked the crystal! Soon we shall emerge!"),
+                            new ChangeSize(-2, 80),
+                            new ConditionalEffect(ConditionEffectIndex.Invulnerable),
+                            new Flash(0xff000000, 2, 10),
+                            new TimedTransition(4000, "BreakCrystal")
+                        ),
+                        new State("BreakCrystal",
+                            new Taunt("This your reward! Imagine what evil even Oryx needs to keep locked up!"),
+                            new Shoot(0, count: 16, shootAngle: 22.5, fixedAngle: 0, coolDown: 100000),
+                            new Spawn("Crystal Prisoner", maxChildren: 1, initialSpawn: 1, coolDown: 100000),
+                            new Decay(0)
+                        )
+                    )
+                );*/
     }
 }
